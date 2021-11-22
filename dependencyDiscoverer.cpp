@@ -276,7 +276,7 @@ static void printDependencies(std::unordered_set<std::string> *printed,
 }
 
 
-int initialise(int num){
+void initialise(int num){
     //initialises threads
     for (int i=0;i<num;i++){
         //adds each action to the queue
