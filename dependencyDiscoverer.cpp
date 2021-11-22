@@ -107,8 +107,59 @@
 #include <list>
 
 std::vector<std::string> dirs;
-std::unordered_map<std::string, std::list<std::string>> theTable;
-std::list<std::string> workQ;
+
+std:: vector<std::thread> threads;
+
+struct Queue {
+    private:
+    std::mutex m; 
+    std::list<std:string> q;
+    public:
+    auto front(){//entering critical section, lock
+        std::unique_lock<std::mutex> lock(m);
+        return q.front();
+    }// automatically unlocks
+    auto pop_front(){
+        std::unique_lock<std::mutex> lock(m);
+        std::string qFront=q.front();
+        q.pop_front();
+        return qFront;
+    }
+    int size(){
+        std::unique_lock<std::mutex> lock(m);
+        return q.size();
+    }
+    void push_back(std::string str){
+        std::unique_lock<std::mutex> lock(m);
+        q.push_back(str);
+    }
+}
+
+struct Table {
+    private:
+    std::mutex m;
+    std::unordered_map<std::string,std::list<std::string>> t;
+    public:
+    void insert(std::string n, std::list<std::string>file){
+        std::unique_lock<std::mutex> lock(m);
+        t.insert(name,file);
+    }
+    auto find(std:: string str){
+        std::unique_lock<std::mutex> lock(m);
+        return t.find(str);
+    }
+    auto end(){
+        std::unique_lock<std::mutex> lock(m);
+        return t.end();
+    }
+    auto get(std:: string str){
+        std::unique_lock<std::mutex> lock(m);
+        return &t[str];
+    }
+}
+
+Queue workQ;
+Table theTable;
 
 std::string dirName(const char * c_str) {
   std::string s = c_str; // s takes ownership of the string content by allocating memory for it
@@ -206,7 +257,37 @@ static void printDependencies(std::unordered_set<std::string> *printed,
   }
 }
 
+void execute(){
+    while(workQ!=0){
+        std::string filestr=workQ.pop_front();
+
+        if (theTable.find(filestr)!=theTable.end()){
+            process(filestr.c_str(),theTable.get(filestr));
+        }
+    }
+}
+int numOfThreads(char *cThreads){
+    if (cThreads!=NULL){
+       return std::stoi(cThreads);
+    }else{
+        return 2;
+    }
+}
+
+void initialise(int num){
+    for (int i=0;i<num){
+        threads.push_back([](){execute()};
+    }
+    for(int i=0;i<threads.size()){
+        threads[i].join();
+    }
+}
+
 int main(int argc, char *argv[]) {
+  char *cThreads=getenv("CRAWLER_THREADS");
+  noThreads=numOfThreads(cThreads);
+
+  
   // 1. look up CPATH in environment
   char *cpath = getenv("CPATH");
 
@@ -256,19 +337,8 @@ int main(int argc, char *argv[]) {
     workQ.push_back( argv[i] );
   }
 
-  // 4. for each file on the workQ
-  while ( workQ.size() > 0 ) {
-    std::string filename = workQ.front();
-    workQ.pop_front();
+  initialise(noThreads);
 
-    if (theTable.find(filename) == theTable.end()) {
-      fprintf(stderr, "Mismatch between table and workQ\n");
-      return -1;
-    }
-
-    // 4a&b. lookup dependencies and invoke 'process'
-    process(filename.c_str(), &theTable[filename]);
-  }
 
   // 5. for each file argument
   for (i = start; i < argc; i++) {
