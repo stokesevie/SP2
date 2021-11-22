@@ -157,7 +157,7 @@ struct Table {
         std::unique_lock<std::mutex> lock(m);
         return t.end();
     }
-    auto get(std:: string str){
+    auto get(string *str){
         std::unique_lock<std::mutex> lock(m);
         return &t[str];
     }
@@ -267,7 +267,7 @@ void execute(){
         std::string filestr=workQ.pop_front();
 
         if (theTable.find(filestr)!=theTable.end()){
-            process(filestr.c_str(),theTable.get(filestr));
+            process(filestr.c_str(),theTable.get(*filestr));
         }
     }
 }
