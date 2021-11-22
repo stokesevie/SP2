@@ -115,7 +115,7 @@ std::vector<std::string> dirs;
 
 std::vector<std::thread> threads;
 
-struct Queue {
+struct TaskQueue {
     private:
     std::mutex m; 
     std::list<std::string> q;
@@ -125,16 +125,19 @@ struct Queue {
         return q.front();
     }// automatically unlocks
     auto pop_front(){
+        //pops and returns value at front of queue
         std::unique_lock<std::mutex> lock(m);
         std::string qFront=q.front();
         q.pop_front();
         return qFront;
     }
     int size(){
+        //returns the size of the queue
         std::unique_lock<std::mutex> lock(m);
         return q.size();
     }
     void push_back(std::string str){
+        //adds 
         std::unique_lock<std::mutex> lock(m);
         q.push_back(str);
     }
@@ -151,21 +154,23 @@ struct Table {
         t.insert({n,file});
     }
     auto find(std:: string filestr){
-        //returns the string its searching for or -1 if not found
+        //returns the string its searching for or end of table if not found
         std::unique_lock<std::mutex> lock(m);
         return t.find(filestr);
     }
     auto end(){
+        //returns end of table
         std::unique_lock<std::mutex> lock(m);
         return t.end();
     }
     auto get(std::string str){
+        //gets value assciated with key
         std::unique_lock<std::mutex> lock(m);
         return &t[str];
     }
 };
 
- Queue workQ; //initialise new thread safe queue struct for list
+ TaskQueue workQ; //initialise new thread safe queue struct for list
  Table theTable; //initialise new thread safe table struct for unordered map
 
 std::string dirName(const char * c_str) {
