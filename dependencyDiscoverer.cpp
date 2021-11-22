@@ -288,7 +288,7 @@ int initialise(int num){
                     //if the file does not appear by end of table
                     process(filestr.c_str(),theTable.get(filestr));
                 }else{
-                    fprintf(stderr,"Mismatch between table and workQ\n")
+                    fprintf(stderr,"Mismatch between table and workQ\n");
                     return -1;
                 }
             }
