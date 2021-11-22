@@ -115,7 +115,8 @@ std::vector<std::string> dirs;
 
 std::vector<std::thread> threads;
 
-struct TaskQueue {
+struct TSQueue {
+    //new structure using features of list to make TS
     private:
     std::mutex m; 
     std::list<std::string> q;
@@ -137,41 +138,42 @@ struct TaskQueue {
         return q.size();
     }
     void push_back(std::string str){
-        //adds 
+        //adds file to check for dependenceies
         std::unique_lock<std::mutex> lock(m);
         q.push_back(str);
     }
 };
 
-struct Table {
+struct TSMap {
+    //new structure using features of unordered map to make TS
     private:
     std::mutex m;
-    std::unordered_map<std::string,std::list<std::string>> t;
+    std::unordered_map<std::string,std::list<std::string>> map;
     public:
     void insert(std::string n, std::list<std::string>file){
         //takes a name and joins with list of dependent files and adds to table
         std::unique_lock<std::mutex> lock(m);
-        t.insert({n,file});
+        map.insert({n,file});
     }
     auto find(std:: string filestr){
-        //returns the string its searching for or end of table if not found
+        //returns the string its searching for or end iterator if not found
         std::unique_lock<std::mutex> lock(m);
-        return t.find(filestr);
+        return map.find(filestr);
     }
     auto end(){
         //returns end of table
         std::unique_lock<std::mutex> lock(m);
-        return t.end();
+        return map.end();
     }
     auto get(std::string str){
         //gets value assciated with key
         std::unique_lock<std::mutex> lock(m);
-        return &t[str];
+        return &map[str];
     }
 };
 
- TaskQueue workQ; //initialise new thread safe queue struct for list
- Table theTable; //initialise new thread safe table struct for unordered map
+ TSQueue workQ; //initialise new thread safe queue struct for list
+ TSMap theTable; //initialise new thread safe map struct for unordered map
 
 std::string dirName(const char * c_str) {
   std::string s = c_str; // s takes ownership of the string content by allocating memory for it
@@ -288,8 +290,9 @@ void execute(){
 }
 
 void initialise(int num){
+    //initialises threads
     for (int i=0;i<num;i++){
-        threads.emplace_back([](){execute();});
+        threads.push_back([](){execute();});
     }
     for(int i=0;i<threads.size();i++){
         threads[i].join();
