@@ -108,7 +108,7 @@
 
 std::vector<std::string> dirs;
 
-std:: vector<std::thread> threads;
+std::vector<std::thread> threads;
 
 struct Queue {
     private:
