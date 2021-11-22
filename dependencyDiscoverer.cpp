@@ -166,6 +166,8 @@ struct Table {
     }
 };
 
+ Queue workQ; //initialise new thread safe queue struct for list
+ Table theTable; //initialise new thread safe table struct for unordered map
 
 std::string dirName(const char * c_str) {
   std::string s = c_str; // s takes ownership of the string content by allocating memory for it
@@ -293,8 +295,7 @@ void initialise(int num){
 int main(int argc, char *argv[]) {
   char *cThreads=getenv("CRAWLER_THREADS");
   int noThreads=numOfThreads(cThreads);
-  Queue workQ; //initialise new thread safe queue struct for list
-  Table theTable; //initialise new thread safe table struct for unordered map
+
 
   
   // 1. look up CPATH in environment
