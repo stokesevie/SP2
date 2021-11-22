@@ -275,16 +275,6 @@ static void printDependencies(std::unordered_set<std::string> *printed,
   }
 }
 
-void execute(){
-    while(workQ.size()!=0){ //executes until the queue is empty
-        std::string filestr=workQ.pop_front();
-        //takes the name of the file at the front of the queue
-        if (theTable.find(filestr)!=theTable.end()){
-            //if the file does not appear by end of table
-            process(filestr.c_str(),theTable.get(filestr));
-        }
-    }
-}
 
 void initialise(int num){
     //initialises threads
