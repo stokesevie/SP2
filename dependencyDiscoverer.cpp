@@ -227,7 +227,7 @@ static void process(const char *file, std::list<std::string> *ll) {
     // 2bii. if file name not already in table ...
     if (theTable.find(name) != theTable.end()) { continue; }
     // ... insert mapping from file name to empty list in table ...
-    theTable.insert( { name, {} } );
+    theTable.insert(  name, {} );
     // ... append file name to workQ
     workQ.push_back( name );
   }
@@ -333,10 +333,10 @@ int main(int argc, char *argv[]) {
     std::string obj = pair.first + ".o";
 
     // 3a. insert mapping from file.o to file.ext
-    theTable.insert( { obj, { argv[i] } } );
+    theTable.insert( obj, { argv[i] } );
     
     // 3b. insert mapping from file.ext to empty list
-    theTable.insert( { argv[i], { } } );
+    theTable.insert(  argv[i], { }  );
     
     // 3c. append file.ext on workQ
     workQ.push_back( argv[i] );
