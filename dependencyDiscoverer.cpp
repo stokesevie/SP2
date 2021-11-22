@@ -147,7 +147,7 @@ struct Table {
     public:
     void insert(std::string n, std::list<std::string>file){
         std::unique_lock<std::mutex> lock(m);
-        t.insert({n,{file}});
+        t.insert({n,file});
     }
     auto find(std:: string str){
         std::unique_lock<std::mutex> lock(m);
@@ -281,7 +281,7 @@ int numOfThreads(char *cThreads){
 
 void initialise(int num){
     for (int i=0;i<num;i++){
-        threads.push_back([](){execute();});
+        threads.emplace_back([](){execute();});
     }
     for(int i=0;i<threads.size();i++){
         threads[i].join();
