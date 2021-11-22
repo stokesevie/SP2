@@ -145,7 +145,7 @@ struct Table {
     std::mutex m;
     std::unordered_map<std::string,std::list<std::string>> t;
     public:
-    void insert({std::string n, std::list<std::string>file}){
+    void insert(std::string n, std::list<std::string>file){
         std::unique_lock<std::mutex> lock(m);
         t.insert({n,file});
     }
