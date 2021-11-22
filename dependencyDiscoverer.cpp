@@ -118,7 +118,7 @@ std::vector<std::thread> threads;
 struct Queue {
     private:
     std::mutex m; 
-    std::list<std:string> q;
+    std::list<std::string> q;
     public:
     auto front(){//entering critical section, lock
         std::unique_lock<std::mutex> lock(m);
@@ -138,7 +138,7 @@ struct Queue {
         std::unique_lock<std::mutex> lock(m);
         q.push_back(str);
     }
-}
+};
 
 struct Table {
     private:
@@ -147,7 +147,7 @@ struct Table {
     public:
     void insert(std::string n, std::list<std::string>file){
         std::unique_lock<std::mutex> lock(m);
-        t.insert(name,file);
+        t.insert({n,file}fwhu);
     }
     auto find(std:: string str){
         std::unique_lock<std::mutex> lock(m);
@@ -161,7 +161,7 @@ struct Table {
         std::unique_lock<std::mutex> lock(m);
         return &t[str];
     }
-}
+};
 
 Queue workQ;
 Table theTable;
@@ -263,7 +263,7 @@ static void printDependencies(std::unordered_set<std::string> *printed,
 }
 
 void execute(){
-    while(workQ!=0){
+    while(workQ.size()!=0){
         std::string filestr=workQ.pop_front();
 
         if (theTable.find(filestr)!=theTable.end()){
@@ -280,17 +280,17 @@ int numOfThreads(char *cThreads){
 }
 
 void initialise(int num){
-    for (int i=0;i<num){
-        threads.push_back([](){execute()};
+    for (int i=0;i<num;i++){
+        threads.push_back([](){execute()});
     }
-    for(int i=0;i<threads.size()){
+    for(int i=0;i<threads.size();i++){
         threads[i].join();
     }
 }
 
 int main(int argc, char *argv[]) {
   char *cThreads=getenv("CRAWLER_THREADS");
-  noThreads=numOfThreads(cThreads);
+  int noThreads=numOfThreads(cThreads);
 
   
   // 1. look up CPATH in environment
