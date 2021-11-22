@@ -146,12 +146,15 @@ struct Table {
     std::unordered_map<std::string,std::list<std::string>> t;
     public:
     void insert(std::string n, std::list<std::string>file){
+        //takes a name and joins with list of dependent files and adds to table
         std::unique_lock<std::mutex> lock(m);
         t.insert({n,file});
     }
-    auto find(std:: string str){
+    auto find(std:: string filestr){
+        //returns the string its searching for or -1 if not found
         std::unique_lock<std::mutex> lock(m);
-        return t.find(str);
+        printf(t.find(filestr))
+        return t.find(filestr);
     }
     auto end(){
         std::unique_lock<std::mutex> lock(m);
@@ -163,8 +166,6 @@ struct Table {
     }
 };
 
-Queue workQ;
-Table theTable;
 
 std::string dirName(const char * c_str) {
   std::string s = c_str; // s takes ownership of the string content by allocating memory for it
@@ -172,6 +173,13 @@ std::string dirName(const char * c_str) {
   return s;
 }
 
+int numOfThreads(char *cThreads){
+    if (cThreads!=NULL){
+       return std::stoi(cThreads);
+    }else{
+        return 2;
+    }
+}
 std::pair<std::string, std::string> parseFile(const char* c_file) {
   std::string file = c_file;
   std::string::size_type pos = file.rfind('.');
@@ -263,19 +271,13 @@ static void printDependencies(std::unordered_set<std::string> *printed,
 }
 
 void execute(){
-    while(workQ.size()!=0){
+    while(workQ.size()!=0){ //executes until the queue is empty
         std::string filestr=workQ.pop_front();
-
+        //takes the name of the file at the front of the queue
         if (theTable.find(filestr)!=theTable.end()){
+            //if the file does not appear by end of table
             process(filestr.c_str(),theTable.get(filestr));
         }
-    }
-}
-int numOfThreads(char *cThreads){
-    if (cThreads!=NULL){
-       return std::stoi(cThreads);
-    }else{
-        return 2;
     }
 }
 
@@ -291,6 +293,8 @@ void initialise(int num){
 int main(int argc, char *argv[]) {
   char *cThreads=getenv("CRAWLER_THREADS");
   int noThreads=numOfThreads(cThreads);
+  Queue workQ; //initialise new thread safe queue struct for list
+  Table theTable; //initialise new thread safe table struct for unordered map
 
   
   // 1. look up CPATH in environment
