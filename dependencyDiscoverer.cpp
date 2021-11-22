@@ -145,7 +145,7 @@ struct Table {
     std::mutex m;
     std::unordered_map<std::string,std::list<std::string>> t;
     public:
-    void insert({std::string n, std::list<std::string>file}){
+    void insert(std::string n, std::list<std::string>file){
         std::unique_lock<std::mutex> lock(m);
         t.insert({n,file});
     }
@@ -157,7 +157,7 @@ struct Table {
         std::unique_lock<std::mutex> lock(m);
         return t.end();
     }
-    auto get(string *str){
+    auto get(std::string str){
         std::unique_lock<std::mutex> lock(m);
         return &t[str];
     }
@@ -247,7 +247,7 @@ static void printDependencies(std::unordered_set<std::string> *printed,
     std::string name = toProcess->front();
     toProcess->pop_front();
     // 3. lookup file in the table, yielding list of dependencies
-    std::list<std::string> *ll = &theTable[name];
+    std::list<std::string> *ll = theTable.get(name);
     // 4. iterate over dependencies
     for (auto iter = ll->begin(); iter != ll->end(); iter++) {
       // 4a. if filename is already in the printed table, continue
@@ -267,7 +267,7 @@ void execute(){
         std::string filestr=workQ.pop_front();
 
         if (theTable.find(filestr)!=theTable.end()){
-            process(filestr.c_str(),theTable.get(*filestr));
+            process(filestr.c_str(),theTable.get(filestr));
         }
     }
 }
