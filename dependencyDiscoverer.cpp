@@ -276,7 +276,7 @@ static void printDependencies(std::unordered_set<std::string> *printed,
 }
 
 
-void initialise(int num){
+int initialise(int num){
     //initialises threads
     for (int i=0;i<num;i++){
         //adds each action to the queue
@@ -287,8 +287,12 @@ void initialise(int num){
                 if (theTable.find(filestr)!=theTable.end()){
                     //if the file does not appear by end of table
                     process(filestr.c_str(),theTable.get(filestr));
+                }else{
+                    fprintf(stderr,"Mismatch between table and workQ\n")
+                    return -1;
                 }
             }
+            return 0;
         });
     }
     for(int j=0;j<num;j++){
