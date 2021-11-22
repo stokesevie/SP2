@@ -121,28 +121,32 @@ struct TSQueue {
     std::mutex m; 
     std::list<std::string> q;
     public:
-    auto front(){//entering critical section, lock
+    void push_back(std::string str){//entering critical section, lock
+        //adds file to check for dependenceies
+        std::unique_lock<std::mutex> lock(m);
+        q.push_back(str);
+    }// automatically unlocks
+    long size(){
+        //returns the size of the queue
+        std::unique_lock<std::mutex> lock(m);
+        return q.size();
+    }
+    std::string front(){
+        //returns front of queue
         std::unique_lock<std::mutex> lock(m);
         return q.front();
-    }// automatically unlocks
-    auto pop_front(){
+    }
+    std::string pop_front(){
         //pops and returns value at front of queue
         std::unique_lock<std::mutex> lock(m);
         std::string qFront=q.front();
         q.pop_front();
         return qFront;
     }
-    int size(){
-        //returns the size of the queue
-        std::unique_lock<std::mutex> lock(m);
-        return q.size();
-    }
-    void push_back(std::string str){
-        //adds file to check for dependenceies
-        std::unique_lock<std::mutex> lock(m);
-        q.push_back(str);
-    }
 };
+
+ TSQueue workQ; //initialise new thread safe queue struct for list
+
 
 struct TSMap {
     //new structure using features of unordered map to make TS
@@ -155,24 +159,24 @@ struct TSMap {
         std::unique_lock<std::mutex> lock(m);
         map.insert({n,file});
     }
+    auto get(std::string str){
+        //gets value assciated with key or returns end iterator
+        std::unique_lock<std::mutex> lock(m);
+        return &map[str];
+    }
     auto find(std:: string filestr){
         //returns the string its searching for or end iterator if not found
         std::unique_lock<std::mutex> lock(m);
         return map.find(filestr);
     }
     auto end(){
-        //returns end of table
+        //returns end iterator of table
         std::unique_lock<std::mutex> lock(m);
         return map.end();
     }
-    auto get(std::string str){
-        //gets value assciated with key
-        std::unique_lock<std::mutex> lock(m);
-        return &map[str];
-    }
+
 };
 
- TSQueue workQ; //initialise new thread safe queue struct for list
  TSMap theTable; //initialise new thread safe map struct for unordered map
 
 std::string dirName(const char * c_str) {
@@ -181,13 +185,6 @@ std::string dirName(const char * c_str) {
   return s;
 }
 
-int numOfThreads(char *cThreads){
-    if (cThreads!=NULL){
-       return std::stoi(cThreads);
-    }else{
-        return 2;
-    }
-}
 std::pair<std::string, std::string> parseFile(const char* c_file) {
   std::string file = c_file;
   std::string::size_type pos = file.rfind('.');
@@ -292,17 +289,32 @@ void execute(){
 void initialise(int num){
     //initialises threads
     for (int i=0;i<num;i++){
-        threads.push_back([](){execute();});
+        //adds each action to the queue
+        threads.emplace_back([](){
+            while(workQ.size()!=0){ //executes until the queue is empty
+                std::string filestr=workQ.pop_front();
+                //takes the name of the file at the front of the queue
+                if (theTable.find(filestr)!=theTable.end()){
+                    //if the file does not appear by end of table
+                    process(filestr.c_str(),theTable.get(filestr));
+                }
+            }
+        });
     }
-    for(int i=0;i<threads.size();i++){
-        threads[i].join();
+    for(int j=0;j<num;j++){
+        //joins threads so the next thread does not begin until the previous has terminated
+        threads[j].join();
     }
 }
 
 int main(int argc, char *argv[]) {
   char *cThreads=getenv("CRAWLER_THREADS");
-  int noThreads=numOfThreads(cThreads);
-
+  int noThreads;
+  if (cThreads!=NULL){
+       noThreads=std::stoi(cThreads);
+    }else{
+        noThreads=2;
+    }
 
   
   // 1. look up CPATH in environment
