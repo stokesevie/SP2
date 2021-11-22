@@ -95,6 +95,11 @@
  * openFile()  - attempts to open a filename using the search path defined by the dirs vector.
  */
 
+
+ /*
+ *Aropa login ID: 2444030
+ *This is my own work as defined in the Academics Ethics Agreement I have signed.
+ */
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -309,8 +314,6 @@ int main(int argc, char *argv[]) {
     }else{
         noThreads=2;
     }
-
-  
   // 1. look up CPATH in environment
   char *cpath = getenv("CPATH");
 
