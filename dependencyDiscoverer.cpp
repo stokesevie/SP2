@@ -153,7 +153,6 @@ struct Table {
     auto find(std:: string filestr){
         //returns the string its searching for or -1 if not found
         std::unique_lock<std::mutex> lock(m);
-        cout << t.find(filestr);
         return t.find(filestr);
     }
     auto end(){
