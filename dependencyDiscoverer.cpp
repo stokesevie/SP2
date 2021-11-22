@@ -106,6 +106,11 @@
 #include <unordered_set>
 #include <list>
 
+
+#include <thread>
+#include <mutex>
+
+
 std::vector<std::string> dirs;
 
 std::vector<std::thread> threads;
